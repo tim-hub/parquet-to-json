@@ -8,13 +8,15 @@ import pyarrow.orc as orc
 
 CONVERTERS = ['parquet2json', ]
 
+CHAR_LIMIT=10000
+
 
 def parquet2json(filename):
     df = pd.read_parquet(f'{filename}.parquet')
     df.drop('__index_level_0__', axis=1, inplace=True)
 
-    df = df[(df['prompt'].str.len() < 12288) & (df['completion'].str.len() < 12288) & (
-                df['completion'].str.len() + df['prompt'].str.len() < 12288)]
+    df = df[(df['prompt'].str.len() < CHAR_LIMIT) & (df['completion'].str.len() < CHAR_LIMIT) & (
+                df['completion'].str.len() + df['prompt'].str.len() < CHAR_LIMIT)]
 
     training_data = df.sample(frac=0.8, random_state=0)
     training_data.to_json(f'{filename}.jsonl', orient='records', lines=True)
